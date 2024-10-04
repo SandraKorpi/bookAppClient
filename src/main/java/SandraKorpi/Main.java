@@ -1,5 +1,7 @@
 package SandraKorpi;
 
+import org.apache.hc.core5.http.ParseException;
+
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -7,11 +9,18 @@ public class Main {
     private static UserService userService = new UserService();
     private static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    private static boolean isLoggedIn = false; // Spåra om användaren är inloggad
+
+    public static void main(String[] args) throws IOException, ParseException {
         while (true) {
             System.out.println("Välj ett alternativ:");
             System.out.println("1. Registrera användare");
             System.out.println("2. Logga in");
+            if (isLoggedIn) { // Visa alternativet för att lägga till bok endast när inloggad
+                System.out.println("4. Lägg till bok");
+                System.out.println("5. Visa alla böcker");
+                System.out.println("6.Visa dina favoritböcker");
+            }
             System.out.println("3. Avsluta");
 
             int choice = scanner.nextInt();
@@ -25,14 +34,48 @@ public class Main {
                     loginUser();
                     break;
                 case 3:
-                    logoutUser();
+                    userService.logoutUser();
                     System.out.println("Avslutar programmet.");
                     return; // Avsluta programmet
+                case 4:
+                    addBook();
+                    break;
+                case 5:
+                    userService.showAllBooks();
+                    break;
+                case 6: userService.getFavoriteBooks();
+                break;
+
                 default:
                     System.out.println("Ogiltigt val. Försök igen.");
             }
         }
     }
+    private static void addBook() {
+        try {
+            System.out.print("Ange boktitel: ");
+            String title = scanner.nextLine();
+            System.out.print("Ange författare: ");
+            String author = scanner.nextLine();
+            System.out.print("Ange publiceringsår: ");
+            int yearPublished = scanner.nextInt();
+            scanner.nextLine(); // Konsumera den nya raden
+            System.out.print("Ange genre: ");
+            String genre = scanner.nextLine();
+            System.out.print("Rekommenderad (true/false): ");
+            boolean isRecommended = scanner.nextBoolean();
+            scanner.nextLine(); // Konsumera den nya raden
+
+            // Skapa en BookDto
+            BookDto bookDto = new BookDto(0, title, author, yearPublished, genre, isRecommended);
+
+            // Anropa addBook-metoden i UserService
+            userService.addBook(bookDto);
+        } catch (IOException | ParseException e) {
+            System.out.println("Ett fel uppstod vid tillägg av boken: " + e.getMessage());
+        }
+    }
+
 
     private static void registerUser() {
         try {
@@ -56,19 +99,24 @@ public class Main {
             System.out.print("Ange lösenord: ");
             String password = scanner.nextLine();
 
-            String token = userService.loginUser(username, password);
-            if (token != null) {
-                System.out.println("Inloggning lyckades! JWT-token: " + token);
+            // Utför inloggning med UserService
+            userService.loginUser(username, password);
+
+            // Kontrollera om inloggning lyckades baserat på om jwtToken inte är null
+            if (userService.getJwtToken() != null) {
+                System.out.println("Inloggning lyckades!");
                 // Här kan du lägga till kod för att hantera inloggad status
+                isLoggedIn = true; // Sätt inloggad status till true
             } else {
                 System.out.println("Inloggning misslyckades.");
+
             }
         } catch (IOException e) {
             System.out.println("Ett fel uppstod vid inloggning: " + e.getMessage());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
     }
-    public static void logoutUser() {
-        this.jwtToken = null; // Ta bort token för att logga ut användaren
-        System.out.println("Användaren har loggats ut.");
-    }
+
+
 }
