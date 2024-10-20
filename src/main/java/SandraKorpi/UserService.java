@@ -19,13 +19,13 @@ import java.util.Map;
 public class UserService {
     private static final String API_BASE_URL = "http://NYbookapi-env.eba-i4k2gzqx.eu-north-1.elasticbeanstalk.com"; // Ändra till din API-url
     private CloseableHttpClient httpClient = HttpClients.createDefault();
-    private ObjectMapper objectMapper = new ObjectMapper(); // Skapa ObjectMapper
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    private String jwtToken; // Lagra token i en privat variabel
+    private String jwtToken;
 
     // Registrera användare
     public void registerUser(String username, String email, String password) throws IOException {
-        String registerUrl = API_BASE_URL + "/auth/register"; // Använd den korrekta registrerings-endpoint
+        String registerUrl = API_BASE_URL + "/auth/register";
         HttpPost postRequest = new HttpPost(registerUrl);
 
         // Skapa användardata som ska skickas
@@ -81,7 +81,7 @@ public class UserService {
     }
 
     public void addBook(BookDto bookDto) throws IOException, ParseException {
-        String addBookUrl = API_BASE_URL + "/books/add"; // Justera URL:n för att passa din API-struktur
+        String addBookUrl = API_BASE_URL + "/books/add";
         HttpPost postRequest = new HttpPost(addBookUrl);
         postRequest.setHeader("Authorization", "Bearer " + jwtToken); // Lägg till JWT-token i headern
 
@@ -113,7 +113,7 @@ public class UserService {
                 // Använd ObjectMapper för att konvertera JSON till en lista av books
                 List<BookDto> bookList = objectMapper.readValue(jsonResponse,
                         objectMapper.getTypeFactory().constructCollectionType(List.class, BookDto.class));
-                // Skriv ut böckerna i konsolen
+                // Skriver ut böckerna
                 for( BookDto book : bookList) {
                     System.out.println("Titel: " + book.getTitle() + " författare: " + book.getAuthor());
                 }
@@ -130,7 +130,7 @@ public class UserService {
     }
 
     public void getFavoriteBooks(){
-        String addBookUrl = API_BASE_URL + "/users/favorite-books"; // för att hämta alla books
+        String addBookUrl = API_BASE_URL + "/users/favorite-books";
         HttpGet getRequest = new HttpGet(addBookUrl);
         getRequest.setHeader("Authorization", "Bearer " + jwtToken); // Lägg till JWT-token i headern
         try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
