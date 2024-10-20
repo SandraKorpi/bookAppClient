@@ -1,0 +1,1 @@
+En klient till servicen som finns i aws. Simpel meny där användare kan registrera sig, logga in och sedan utföra CRUD-operationer mot en databas med böcker. De kan också skapa en lista för sina favoritböcker.
